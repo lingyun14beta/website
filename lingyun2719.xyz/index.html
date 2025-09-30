@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人主页</title>
+<style>
+#avatar-msg {
+  position: relative;
+  display: inline-block;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  max-width: 250px;
+  word-wrap: break-word;
+  text-align: left;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* 小三角形指向头像 */
+#avatar-msg::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent rgba(255,255,255,0.9) transparent transparent;
+}
+
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", sans-serif;
+  background: url('background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding-top: 50px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.7);
+  margin-bottom: 1rem;
+}
+
+h1 {
+  margin: 0.5rem 0;
+  font-size: 2rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+#sentence-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+#sentence {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.refresh-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.5s ease;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-icon {
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.btn-icon:hover {
+  transform: scale(1.2);
+  background: rgba(255,255,255,0.4);
+}
+
+.rotate {
+  animation: rotate 0.5s linear;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+#datetime {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  padding: 0.8rem 1.5rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: calc(50px * 4 + 3rem);
+}
+
+#time {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+#date {
+  font-size: 1rem;
+}
+
+#weather-popup, #news-popup, #email-popup {
+  display: none; /* 初始隐藏 */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.95);
+  color: #000;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 1000;
+  width: 320px;
+  flex-direction: column;
+  align-items: center;
+}
+
+#weather-popup input {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border:1px solid #ccc;
+}
+
+#weather-popup button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border:none;
+  border-radius:6px;
+  background:#1976d2;
+  color:#fff;
+  cursor:pointer;
+}
+
+#weather-result, #news-text {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+#news-popup .news-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#news-popup img {
+  width: 100%;       
+  height: auto;      
+  border-radius:12px;
+  display: block;
+  margin: 0 auto;
+  max-height: 80vh;  
+}
+
+#news-close, #email-close {
+  cursor: pointer;
+  font-weight:bold;
+}
+
+footer {
+  margin-top: auto;
+  padding: 1rem;
+  color: #fff;
+  font-size: 0.9rem;
+  text-align: center;
+  opacity: 0.8;
+}
+
+@media(max-width: 400px){
+  #sentence-container { flex-direction: column; gap: 0.5rem; }
+  .button-group { gap: 0.5rem; }
+  #datetime { width: calc(50px*4); }
+  #weather-popup, #news-popup, #email-popup { width: 90%; }
+  #news-popup img { max-width: 70%; }
+}
+</style>
+</head>
+<body>
+
+<img src="avatar.jpg" alt="头像" class="avatar" onclick="avatarSpeak()">
+
+<h1>凌</h1>
+
+<div id="sentence-container" class="glass">
+  <div id="sentence">加载中...</div>
+  <div id="refresh" class="refresh-btn" onclick="refreshSentence()">🔄</div>
+</div>
+
+<div class="button-group">
+  <a href="https://b23.tv/5AsjQoJ" target="_blank" class="btn-icon" title="Bilibili">
+    <img src="bilibili.png" alt="Bilibili">
+  </a>
+  <a href="https://x.com/aaa1447235" target="_blank" class="btn-icon" title="X">
+    <img src="x.png" alt="X">
+  </a>
+  <a href="https://m.youtube.com/channel/UCaRPW2G8LZCosavC3QZ5Y7A" target="_blank" class="btn-icon" title="YouTube">
+    <img src="youtubes.png" alt="YouTube">
+  </a>
+
+  <!-- 新增 Email 图标 -->
+  <a href="javascript:void(0)" class="btn-icon" id="email-btn" title="Email">
+    <img src="email.png" alt="Email">
+  </a>
+
+  <div class="btn-icon" id="weather-btn" title="天气查询">
+    <img src="weather.png" alt="天气">
+  </div>
+  <div class="btn-icon" id="news-btn" title="每日新闻">
+    <img src="news.png" alt="新闻">
+  </div>
+</div>
+
+<div id="datetime" class="glass">
+  <div id="time">00:00:00</div>
+  <div id="date">0000-00-00</div>
+</div>
+
+<!-- 天气弹窗 -->
+<div id="weather-popup" class="glass">
+  <div style="position: relative; width: 100%;">
+    <div id="weather-close" onclick="closeWeatherPopup()" style="position:absolute; top:5px; right:5px; cursor:pointer; font-weight:bold;">✖</div>
+  </div>
+  <label for="city-input">输入城市名称查询天气：</label>
+  <input type="text" id="city-input" placeholder="例如：北京">
+  <button onclick="queryWeather()">查询</button>
+  <div id="weather-result"></div>
+</div>
+
+<!-- 新闻弹窗 -->
+<div id="news-popup" class="glass">
+  <div class="news-container">
+    <img id="news-image" src="" alt="新闻图片">
+    <div id="news-close" onclick="closeNewsPopup()">✖</div>
+  </div>
+  <p id="news-text"></p>
+</div>
+
+<!-- 邮箱弹窗 -->
+<div id="email-popup" class="glass">
+  <div style="position: relative; width: 100%;">
+    <div id="email-close" onclick="closeEmailPopup()" style="position:absolute; top:5px; right:5px; cursor:pointer; font-weight:bold;">✖</div>
+  </div>
+  <p>我的邮箱：</p>
+  <p style="font-weight:bold; word-break:break-all;">wedoyou@qq.com</p>
+    <p style="font-weight:bold; word-break:break-all;">yling2719@gmail.com</p>
+</div>
+
+<!-- 底部文字 -->
+<footer id="footer"></footer>
+
+<script>
+const messages = [
+  "hello",
+  "你好",
+];
+
+// 头像说话
+function avatarSpeak() {
+  let msgBox = document.getElementById("avatar-msg");
+  if (!msgBox) {
+    msgBox = document.createElement("div");
+    msgBox.id = "avatar-msg";
+    document.querySelector(".avatar").after(msgBox);
+  }
+  const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+  msgBox.textContent = randomMsg;
+  msgBox.style.opacity = "1";
+  setTimeout(() => { msgBox.style.opacity = "0"; }, 2000);
+}
+
+// 刷新句子
+async function loadSentence() {
+  const box = document.getElementById("sentence");
+  box.textContent = "加载中...";
+  try {
+    const res = await fetch("https://uapis.cn/api/v1/saying");
+    const data = await res.json();
+    box.textContent = data.text || "获取失败，请稍后再试";
+  } catch (e) {
+    box.textContent = "网络错误，无法获取句子";
+    console.error(e);
+  }
+}
+function refreshSentence() {
+  const btn = document.getElementById("refresh");
+  btn.classList.add("rotate");
+  setTimeout(() => btn.classList.remove("rotate"), 500);
+  loadSentence();
+}
+loadSentence();
+
+// 更新时间（中国标准时间）
+function updateTime() {
+  const now = new Date();
+  const options = { timeZone: 'Asia/Shanghai', hour12: false };
+  const timeFormatter = new Intl.DateTimeFormat('zh-CN', { ...options, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateFormatter = new Intl.DateTimeFormat('zh-CN', { ...options, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timeParts = timeFormatter.formatToParts(now);
+  const hour = timeParts.find(p => p.type === 'hour').value;
+  const minute = timeParts.find(p => p.type === 'minute').value;
+  const second = timeParts.find(p => p.type === 'second').value;
+  document.getElementById('time').textContent = `${hour}:${minute}:${second}`;
+  document.getElementById('date').textContent = dateFormatter.format(now);
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// 天气查询
+async function queryWeather() {
+  const city = document.getElementById('city-input').value.trim();
+  const resultDiv = document.getElementById('weather-result');
+  if(!city){ resultDiv.innerHTML="请输入城市名称"; return; }
+  resultDiv.innerHTML="查询中...";
+  try {
+    const res = await fetch(`https://uapis.cn/api/v1/misc/weather?unescape=1&version=v61&appid=你的appid&appsecret=你的appsecret&city=${encodeURIComponent(city)}`);
+    const data = await res.json();
+    if(res.status===200 && data.city){
+      resultDiv.innerHTML=`<p>城市: ${data.city} (${data.province})</p>
+      <p>天气: ${data.weather}</p>
+      <p>温度: ${data.temperature}℃</p>
+      <p>湿度: ${data.humidity}%</p>
+      <p>风向: ${data.wind_direction}, 风力: ${data.wind_power}</p>
+      <p>数据更新时间: ${data.report_time}</p>`;
+    } else if(res.status===400){ resultDiv.innerHTML="请求参数错误，请输入正确的城市名称"; }
+    else if(res.status===410){ resultDiv.innerHTML="查询的地区无效或不受支持"; }
+    else if(res.status===500){ resultDiv.innerHTML="服务器内部错误，请稍后重试"; }
+    else if(res.status===502){ resultDiv.innerHTML="上游天气服务错误，请稍后重试"; }
+    else{ resultDiv.innerHTML="未知错误，请稍后重试"; }
+  } catch(e){ console.error(e); resultDiv.innerHTML="网络错误，无法查询"; }
+}
+
+// 打开/关闭天气弹窗
+document.getElementById('weather-btn').addEventListener('click', ()=>document.getElementById('weather-popup').style.display='flex');
+function closeWeatherPopup(){ document.getElementById('weather-popup').style.display='none'; }
+
+// 新闻弹窗
+document.getElementById('news-btn').addEventListener('click', async ()=>{
+  const popup = document.getElementById('news-popup');
+  const newsImg = document.getElementById('news-image');
+  const newsText = document.getElementById('news-text');
+  popup.style.display='flex';
+  newsImg.src='';
+  newsText.textContent='加载中，请稍等...';
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=>controller.abort(), 12000);
+    const res = await fetch('https://uapis.cn/api/v1/daily/news-image?appid=你的appid&appsecret=你的appsecret',{ method:'GET', signal:controller.signal });
+    clearTimeout(timeoutId);
+    if(res.status===200){
+      const blob = await res.blob();
+      newsImg.src = URL.createObjectURL(blob);
+      newsText.textContent='';
+    } else if(res.status===500){ newsText.textContent='服务器内部错误，请稍后重试'; }
+    else if(res.status===502){ newsText.textContent='上游新闻服务错误，请稍后重试'; }
+    else{ newsText.textContent='未知错误，请稍后重试'; }
+  } catch(e){
+    if(e.name==='AbortError'){ newsText.textContent='请求超时，请稍后再试'; }
+    else{ console.error(e); newsText.textContent='网络错误，无法获取新闻'; }
+  }
+});
+function closeNewsPopup(){ document.getElementById('news-popup').style.display='none'; }
+
+// 邮箱弹窗
+document.getElementById('email-btn').addEventListener('click', ()=>{
+  document.getElementById('email-popup').style.display='flex';
+});
+function closeEmailPopup(){
+  document.getElementById('email-popup').style.display='none';
+}
+
+// 加载 footer 文本
+fetch("footer.txt")
+  .then(res => res.text())
+  .then(text => { document.getElementById("footer").textContent = text; })
+  .catch(err => console.error("加载 footer 失败:", err));
+</script>
+</body>
+</html>
