@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人主页</title>
+<style>
+#avatar-msg {
+  position: relative;
+  display: inline-block;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  max-width: 250px;
+  word-wrap: break-word;
+  text-align: left;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* 小三角形指向头像 */
+#avatar-msg::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent rgba(255,255,255,0.9) transparent transparent;
+}
+
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", sans-serif;
+  background: url('background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding-top: 50px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.7);
+  margin-bottom: 1rem;
+}
+
+h1 {
+  margin: 0.5rem 0;
+  font-size: 2rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+#sentence-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+#sentence {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.refresh-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.5s ease;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-icon {
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.btn-icon:hover {
+  transform: scale(1.2);
+  background: rgba(255,255,255,0.4);
+}
+
+.rotate {
+  animation: rotate 0.5s linear;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+#datetime {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  padding: 0.8rem 1.5rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: calc(50px * 4 + 3rem);
+}
+
+#time {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+#date {
+  font-size: 1rem;
+}
+
+#weather-popup, #news-popup, #email-popup {
+  display: none; /* 初始隐藏 */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.95);
+  color: #000;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 1000;
+  width: 320px;
+  flex-direction: column;
+  align-items: center;
+}
+
+#weather-popup input {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border:1px solid #ccc;
+}
+
+#weather-popup button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border:none;
+  border-radius:6px;
+  background:#1976d2;
+  color:#fff;
+  cursor:pointer;
+}
+
+#weather-result, #news-text {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+#news-popup .news-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#news-popup img {
+  width: 100%;       
+  height: auto;      
+  border-radius:12px;
+  display: block;
+  margin: 0 auto;
+  max-height: 80vh;  
+}
+
+#news-close, #email-close {
+  cursor: pointer;
+  font-weight:bold;
+}
+
+@media(max-width: 400px){
+  #sentence-container { flex-direction: column; gap: 0.5rem; }
+  .button-group { gap: 0.5rem; }
+  #datetime { width: calc(50px*4); }
+  #weather-popup, #news-popup, #email-popup { width: 90%; }
+  #news-popup img { max-width: 70%; }
+}
+
+/*  悬浮播放器 */
+#music-box {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  width: 260px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+#music-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+#music-icon {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+#music-title {
+  color: white;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-left: 6px;
+}
+
+#minimize-btn {
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.8;
+}
+#minimize-btn:hover { opacity: 1; }
+
+#controls {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+#controls button {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#controls button:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+#progress-container {
+  width: 100%;
+  height: 5px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  position: relative;
+}
+#progress-bar {
+  height: 5px;
+  width: 0%;
+  background: white;
+  border-radius: 3px;
+}
+
+#time-display {
+  width: 100%;
+  font-size: 12px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+}
+
+#music-mini {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 998;
+}
+#music-mini img {
+  width: 28px;
+  height: 28px;
+  animation: none;
+}
+
+@keyframes spin {
+  from {transform: rotate(0deg);}
+  to {transform: rotate(360deg);}
+}
+
+#footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  opacity: 0.8;
+  padding: 0.6rem 0;
+  z-index: 1000; /* 高于播放器，确保显示 */
+  background: rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+}
+
+</style>
+</head>
+<body>
+
+<img src="avatar.jpg" alt="头像" class="avatar" onclick="avatarSpeak()">
+
+<h1>凌</h1>
+
+<div id="sentence-container" class="glass">
+  <div id="sentence">加载中...</div>
+  <div id="refresh" class="refresh-btn" onclick="refreshSentence()">🔄</div>
+</div>
+
+<div class="button-group">
+  <a href="https://b23.tv/5AsjQoJ" target="_blank" class="btn-icon" title="Bilibili">
+    <img src="bilibili.png" alt="Bilibili">
+  </a>
+  <a href="https://x.com/aaa1447235" target="_blank" class="btn-icon" title="X">
+    <img src="x.png" alt="X">
+  </a>
+  <a href="https://m.youtube.com/channel/UCaRPW2G8LZCosavC3QZ5Y7A" target="_blank" class="btn-icon" title="YouTube">
+    <img src="youtubes.png" alt="YouTube">
+  </a>
+
+  <!-- gitHub 图标 -->
+  <a href="https://github.com/lingyun14beta" target="_blank" class="btn-icon" title="GitHub">
+    <img src="github.png" alt="GitHub">
+  </a>
+  
+  <!-- 新增 Email 图标 -->
+  <a href="javascript:void(0)" class="btn-icon" id="email-btn" title="Email">
+    <img src="email.png" alt="Email">
+  </a>
+
+  <div class="btn-icon" id="weather-btn" title="天气查询">
+    <img src="weather.png" alt="天气">
+  </div>
+  <div class="btn-icon" id="news-btn" title="每日新闻">
+    <img src="news.png" alt="新闻">
+  </div>
+</div>
+
+<div id="datetime" class="glass">
+  <div id="time">00:00:00</div>
+  <div id="date">0000-00-00</div>
+</div>
+
+<!-- 天气弹窗 -->
+<div id="weather-popup" class="glass">
+  <div style="position: relative; width: 100%;">
+    <div id="weather-close" onclick="closeWeatherPopup()" style="position:absolute; top:5px; right:5px; cursor:pointer; font-weight:bold;">✖</div>
+  </div>
+  <label for="city-input">输入城市名称查询天气：</label>
+  <input type="text" id="city-input" placeholder="例如：北京">
+  <button onclick="queryWeather()">查询</button>
+  <div id="weather-result"></div>
+</div>
+
+<!-- 新闻弹窗 -->
+<div id="news-popup" class="glass">
+  <div class="news-container">
+    <img id="news-image" src="" alt="新闻图片">
+    <div id="news-close" onclick="closeNewsPopup()">✖</div>
+  </div>
+  <p id="news-text"></p>
+</div>
+
+<!-- 邮箱弹窗 -->
+<div id="email-popup" class="glass">
+  <div style="position: relative; width: 100%;">
+    <div id="email-close" onclick="closeEmailPopup()" style="position:absolute; top:5px; right:5px; cursor:pointer; font-weight:bold;">✖</div>
+  </div>
+  <p>我的邮箱：</p>
+  <p style="font-weight:bold; word-break:break-all;">wedoyou@qq.com</p>
+    <p style="font-weight:bold; word-break:break-all;">yling2719@gmail.com</p>
+</div>
+
+<!-- 🎧 悬浮音乐播放器（带最小化） -->
+<div id="music-box" class="glass">
+  <div id="music-header">
+    <img id="music-icon" src="music.png" alt="music">
+    <div id="music-title">点击播放音乐</div>
+    <div id="minimize-btn">－</div>
+  </div>
+
+  <audio id="music-player" preload="auto"></audio>
+
+  <div id="controls">
+    <button id="prev-btn">⏮</button>
+    <button id="play-btn">▶️</button>
+    <button id="next-btn">⏭</button>
+    <button id="shuffle-btn">🎲</button>
+  </div>
+
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <div id="time-display">
+    <span id="current-time">0:00</span>
+    <span id="total-time">0:00</span>
+  </div>
+</div>
+
+<!-- 🎵 最小化时的圆形图标 -->
+<div id="music-mini" style="display:none;">
+  <img src="music.png" alt="mini-music">
+</div>
+
+<script>
+const messages = [
+  "hello",
+  "你好",
+];
+
+// 头像说话
+function avatarSpeak() {
+  let msgBox = document.getElementById("avatar-msg");
+  if (!msgBox) {
+    msgBox = document.createElement("div");
+    msgBox.id = "avatar-msg";
+    document.querySelector(".avatar").after(msgBox);
+  }
+  const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+  msgBox.textContent = randomMsg;
+  msgBox.style.opacity = "1";
+  setTimeout(() => { msgBox.style.opacity = "0"; }, 2000);
+}
+
+// 刷新句子
+async function loadSentence() {
+  const box = document.getElementById("sentence");
+  box.textContent = "加载中...";
+  try {
+    const res = await fetch("https://uapis.cn/api/v1/saying");
+    const data = await res.json();
+    box.textContent = data.text || "获取失败，请稍后再试";
+  } catch (e) {
+    box.textContent = "网络错误，无法获取句子";
+    console.error(e);
+  }
+}
+function refreshSentence() {
+  const btn = document.getElementById("refresh");
+  btn.classList.add("rotate");
+  setTimeout(() => btn.classList.remove("rotate"), 500);
+  loadSentence();
+}
+loadSentence();
+
+// 更新时间（中国标准时间）
+function updateTime() {
+  const now = new Date();
+  const options = { timeZone: 'Asia/Shanghai', hour12: false };
+  const timeFormatter = new Intl.DateTimeFormat('zh-CN', { ...options, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateFormatter = new Intl.DateTimeFormat('zh-CN', { ...options, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timeParts = timeFormatter.formatToParts(now);
+  const hour = timeParts.find(p => p.type === 'hour').value;
+  const minute = timeParts.find(p => p.type === 'minute').value;
+  const second = timeParts.find(p => p.type === 'second').value;
+  document.getElementById('time').textContent = `${hour}:${minute}:${second}`;
+  document.getElementById('date').textContent = dateFormatter.format(now);
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// 天气查询
+async function queryWeather() {
+  const city = document.getElementById('city-input').value.trim();
+  const resultDiv = document.getElementById('weather-result');
+  if(!city){ resultDiv.innerHTML="请输入城市名称"; return; }
+  resultDiv.innerHTML="查询中...";
+  try {
+    const res = await fetch(`https://uapis.cn/api/v1/misc/weather?unescape=1&version=v61&appid=你的appid&appsecret=你的appsecret&city=${encodeURIComponent(city)}`);
+    const data = await res.json();
+    if(res.status===200 && data.city){
+      resultDiv.innerHTML=`<p>城市: ${data.city} (${data.province})</p>
+      <p>天气: ${data.weather}</p>
+      <p>温度: ${data.temperature}℃</p>
+      <p>湿度: ${data.humidity}%</p>
+      <p>风向: ${data.wind_direction}, 风力: ${data.wind_power}</p>
+      <p>数据更新时间: ${data.report_time}</p>`;
+    } else if(res.status===400){ resultDiv.innerHTML="请求参数错误，请输入正确的城市名称"; }
+    else if(res.status===410){ resultDiv.innerHTML="查询的地区无效或不受支持"; }
+    else if(res.status===500){ resultDiv.innerHTML="服务器内部错误，请稍后重试"; }
+    else if(res.status===502){ resultDiv.innerHTML="上游天气服务错误，请稍后重试"; }
+    else{ resultDiv.innerHTML="未知错误，请稍后重试"; }
+  } catch(e){ console.error(e); resultDiv.innerHTML="网络错误，无法查询"; }
+}
+
+// 打开/关闭天气弹窗
+document.getElementById('weather-btn').addEventListener('click', ()=>document.getElementById('weather-popup').style.display='flex');
+function closeWeatherPopup(){ document.getElementById('weather-popup').style.display='none'; }
+
+// 新闻弹窗
+document.getElementById('news-btn').addEventListener('click', async ()=>{
+  const popup = document.getElementById('news-popup');
+  const newsImg = document.getElementById('news-image');
+  const newsText = document.getElementById('news-text');
+  popup.style.display='flex';
+  newsImg.src='';
+  newsText.textContent='加载中，请稍等...';
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=>controller.abort(), 12000);
+    const res = await fetch('https://uapis.cn/api/v1/daily/news-image?appid=你的appid&appsecret=你的appsecret',{ method:'GET', signal:controller.signal });
+    clearTimeout(timeoutId);
+    if(res.status===200){
+      const blob = await res.blob();
+      newsImg.src = URL.createObjectURL(blob);
+      newsText.textContent='';
+    } else if(res.status===500){ newsText.textContent='服务器内部错误，请稍后重试'; }
+    else if(res.status===502){ newsText.textContent='上游新闻服务错误，请稍后重试'; }
+    else{ newsText.textContent='未知错误，请稍后重试'; }
+  } catch(e){
+    if(e.name==='AbortError'){ newsText.textContent='请求超时，请稍后再试'; }
+    else{ console.error(e); newsText.textContent='网络错误，无法获取新闻'; }
+  }
+});
+function closeNewsPopup(){ document.getElementById('news-popup').style.display='none'; }
+
+// 邮箱弹窗
+document.getElementById('email-btn').addEventListener('click', ()=>{
+  document.getElementById('email-popup').style.display='flex';
+});
+function closeEmailPopup(){
+  document.getElementById('email-popup').style.display='none';
+}
+
+// === 随机本地背景 ===
+const backgrounds = [
+  "background1.jpg",
+  "background2.jpg",
+  "background3.png",
+  "background4.png",
+  "background5.jpg",
+  "background6.jpg",
+  "background7.jpg",
+  "background8.png",
+];
+
+// 设置随机背景
+function setRandomBackground() {
+  const randomImg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+  document.body.style.backgroundImage = `url('${randomImg}')`;
+}
+
+// 页面加载时执行
+setRandomBackground();
+
+// === 本地音乐播放器 ===
+
+// 音乐文件列表（相对路径）
+const playlist = [
+  "music/空心人札记.mp3",
+  "music/藏蓝.mp3",
+  "music/乐正绫Oi.mp3",
+];
+
+const audio = document.getElementById("music-player");
+const playBtn = document.getElementById("play-btn");
+const prevBtn = document.getElementById("prev-btn");
+const nextBtn = document.getElementById("next-btn");
+const shuffleBtn = document.getElementById("shuffle-btn");
+const title = document.getElementById("music-title");
+const icon = document.getElementById("music-icon");
+const progressContainer = document.getElementById("progress-container");
+const progressBar = document.getElementById("progress-bar");
+const currentTimeEl = document.getElementById("current-time");
+const totalTimeEl = document.getElementById("total-time");
+
+let currentIndex = 0;
+let isPlaying = false;
+let isShuffle = true;
+
+// 格式化时间
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+// 播放选中歌曲
+function loadSong(index) {
+  const file = playlist[index];
+  audio.src = file;
+  title.textContent = file.split('/').pop().replace('.mp3', '');
+}
+
+// 播放或暂停
+function togglePlay() {
+  if (!isPlaying) {
+    audio.play();
+    isPlaying = true;
+    playBtn.textContent = "⏸";
+    icon.style.animation = "spin 4s linear infinite";
+  } else {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = "▶️";
+    icon.style.animation = "none";
+  }
+}
+
+// 上一首
+function playPrev() {
+  currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+  loadSong(currentIndex);
+  audio.play();
+  isPlaying = true;
+  playBtn.textContent = "⏸";
+}
+
+// 下一首
+function playNext() {
+  if (isShuffle) {
+    let next;
+    do {
+      next = Math.floor(Math.random() * playlist.length);
+    } while (next === currentIndex && playlist.length > 1);
+    currentIndex = next;
+  } else {
+    currentIndex = (currentIndex + 1) % playlist.length;
+  }
+  loadSong(currentIndex);
+  audio.play();
+  isPlaying = true;
+  playBtn.textContent = "⏸";
+}
+
+// 切换随机模式
+shuffleBtn.addEventListener("click", () => {
+  isShuffle = !isShuffle;
+  shuffleBtn.style.opacity = isShuffle ? "1" : "0.5";
+});
+
+// 点击进度条调整播放位置
+progressContainer.addEventListener("click", (e) => {
+  const width = progressContainer.clientWidth;
+  const clickX = e.offsetX;
+  const duration = audio.duration;
+  audio.currentTime = (clickX / width) * duration;
+});
+
+// 播放时间更新
+audio.addEventListener("timeupdate", () => {
+  if (audio.duration) {
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    totalTimeEl.textContent = formatTime(audio.duration);
+  }
+});
+
+// 播放结束自动切歌
+audio.addEventListener("ended", playNext);
+
+// 事件绑定
+playBtn.addEventListener("click", togglePlay);
+prevBtn.addEventListener("click", playPrev);
+nextBtn.addEventListener("click", playNext);
+icon.addEventListener("click", togglePlay);
+
+// 初始化第一首
+loadSong(currentIndex);
+
+// 动画样式
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes spin {
+  from {transform: rotate(0deg);}
+  to {transform: rotate(360deg);}
+}
+#controls button {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#controls button:hover {
+  background: rgba(255,255,255,0.4);
+}
+`;
+document.head.appendChild(style);
+
+// === 最小化功能 ===
+const musicBox = document.getElementById("music-box");
+const miniBox = document.getElementById("music-mini");
+const minimizeBtn = document.getElementById("minimize-btn");
+const miniIcon = miniBox.querySelector("img");
+
+// 点击最小化
+minimizeBtn.addEventListener("click", () => {
+  musicBox.style.display = "none";
+  miniBox.style.display = "flex";
+});
+
+// 点击圆形图标恢复
+miniBox.addEventListener("click", () => {
+  miniBox.style.display = "none";
+  musicBox.style.display = "flex";
+});
+
+// 如果正在播放，小图标旋转
+audio.addEventListener("play", () => {
+  miniIcon.style.animation = "spin 4s linear infinite";
+});
+audio.addEventListener("pause", () => {
+  miniIcon.style.animation = "none";
+});
+
+// 加载 footer 文本
+fetch("footer.txt")
+  .then(res => res.text())
+  .then(text => { document.getElementById("footer").textContent = text; })
+  .catch(err => console.error("加载 footer 失败:", err));
+
+</script>
+</body>
+</html>
